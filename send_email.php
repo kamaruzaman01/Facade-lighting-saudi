@@ -2,6 +2,7 @@
 // send_email.php
 
 header('Content-Type: application/json');
+$arabic = ($_POST['lang'] ?? 'en') === 'ar';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Collect and sanitize input data
@@ -13,7 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Check for empty fields
     if (empty($name) || empty($message) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         http_response_code(400);
-        echo json_encode(["status" => "error", "message" => "Please complete the form and try again."]);
+        echo json_encode(["status" => "error", "message" => $arabic ? "يرجى إكمال النموذج والمحاولة مرة أخرى." : "Please complete the form and try again."]);
         exit;
     }
 
@@ -28,20 +29,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email_content .= "Message:\n$message\n";
 
     // Email headers
-    $email_headers = "From: $name <$email>";
+    $email_headers = "From: $name <$email>\r\nContent-Type: text/plain; charset=UTF-8";
 
     // Send the email
     if (mail($recipient, $subject, $email_content, $email_headers)) {
         http_response_code(200);
-        echo json_encode(["status" => "success", "message" => "Thank you! Your message has been sent."]);
+        echo json_encode(["status" => "success", "message" => $arabic ? "شكراً لك! تم إرسال رسالتك." : "Thank you! Your message has been sent."]);
     } else {
         http_response_code(500);
-        echo json_encode(["status" => "error", "message" => "Oops! Something went wrong and we couldn't send your message."]);
+        echo json_encode(["status" => "error", "message" => $arabic ? "تعذر إرسال رسالتك. يرجى المحاولة مرة أخرى." : "Oops! Something went wrong and we couldn't send your message."]);
     }
 
 } else {
     // Not a POST request
     http_response_code(403);
-    echo json_encode(["status" => "error", "message" => "There was a problem with your submission, please try again."]);
+    echo json_encode(["status" => "error", "message" => $arabic ? "حدثت مشكلة أثناء إرسال الطلب. يرجى المحاولة مرة أخرى." : "There was a problem with your submission, please try again."]);
 }
 ?>
